@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Third-party simulators (download separately; test_mars.py needs dev-tools/mars/Mars4_5.jar)
+dev-tools/mars/
+dev-tools/saturn/
+
+# Generated test screenshots
+dev-tools/out/
