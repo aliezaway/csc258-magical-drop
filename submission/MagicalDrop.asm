@@ -202,10 +202,19 @@ gl_draw:
     j game_loop
 
 ##############################################################################
-# Game over: show the final field and stop the program.
+# Game over: show the final field and stop the program. The character is only
+# drawn if its own cell is still empty, so a bubble that reached the
+# character's row is never hidden behind the character.
 ##############################################################################
 game_over:
-    jal draw_board                  # shows the bubble in the character's row
+    jal draw_grid                   # the whole field, including row 13
+    la $t0, grid
+    lw $t1, player_col
+    sll $t1, $t1, 2
+    add $t0, $t0, $t1
+    lw $t2, 364($t0)                # grid[13][player_col] (row 13 starts at 4 * 91)
+    bne $t2, $zero, quit_game       # a bubble is on the character's cell: show it
+    jal draw_player
 quit_game:
     li $v0, 10                      # terminate the program gracefully
     syscall
