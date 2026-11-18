@@ -12,7 +12,7 @@
 \newcommand{\code}[1]{\texttt{#1}}
 
 \title{CSC258 Project Report: Magical Drop}
-\author{Xiangyu Zhou (1012571708) \and Belina (TODO student number)}
+\author{Xiangyu Zhou (1012571708) \and Belina Zhu (TODO student number)}
 \date{}
 
 \begin{document}
@@ -186,16 +186,15 @@ the held bubbles while the character is holding something.
 
 \subsection{Memory after assembling}
 
-% TODO: replace the box below with your own screenshot of the Data Segment in
-% Saturn or MARS, taken right after assembling MagicalDrop.asm:
-%   \includegraphics[width=\textwidth]{figures/memory_screenshot.png}
 \begin{figure}[H]
 \centering
-\fbox{\parbox[c][5cm][c]{0.9\textwidth}{\centering
-\textbf{TODO: screenshot of the data segment in Saturn / MARS}\\[0.5em]
-Assemble \code{MagicalDrop.asm}, open the memory view at
-\code{0x10010000} and insert the screenshot here.}}
-\caption{Memory after assembling.}
+\includegraphics[width=\textwidth]{figures/memory_screenshot.png}
+\caption{Memory in Saturn right after assembling (the program is stopped at a
+breakpoint on the first instruction of \code{main}). Top: from
+\code{0x10010000}, the two addresses followed by the empty \code{grid}.
+Bottom: from \code{0x100104a0}, the variables (\code{player\_col} $= 3$,
+\code{row\_interval} $=$ \code{0x1f4} $= 500$), the \code{palette} from
+\code{0x100104c0} and \code{player\_sprite} from \code{0x100104fc}.}
 \label{fig:memory}
 \end{figure}
 
@@ -239,12 +238,13 @@ calls \code{push\_row} five times. Random rows can already contain a vertical
 match-3, so \code{main} then runs \code{resolve\_matches} once; this is why
 some columns may start shorter than five bubbles.
 
-% TODO: replace this picture with your own screenshot of the Bitmap Display.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{figures/static_scene.png}
-\caption{The scene at the start of a game: the $7 \times 14$ playing field
-with five rows of random bubbles and the character in the bottom row.}
+\caption{Screenshot of the Bitmap Display in Saturn at the start of a game:
+the $7 \times 14$ playing field with five rows of random bubbles (one column
+lost bubbles to a match in the random rows), the flashing aiming line and the
+character in the bottom row.}
 \label{fig:static}
 \end{figure}
 

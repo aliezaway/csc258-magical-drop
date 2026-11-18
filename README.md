@@ -7,7 +7,7 @@
 | 姓名 | 学号 |
 |---|---|
 | Xiangyu Zhou | 1012571708 |
-| Belina | TODO |
+| Belina Zhu | TODO |
 
 ## 文件
 
@@ -16,7 +16,7 @@
 | `submission/MagicalDrop.asm` | 游戏程序 |
 | `submission/project_report.tex` | 项目报告源文件 |
 | `submission/project_report.pdf` | 由 tex 编译出的报告 |
-| `submission/figures/` | 报告用到的三张图(`layout.png`、`screens.png`、`static_scene.png`),编译 tex 时需要 |
+| `submission/figures/` | 报告用到的四张图(`layout.png`、`screens.png`、`static_scene.png`、`memory_screenshot.png`),编译 tex 时需要 |
 
 ## 运行
 
@@ -76,7 +76,7 @@ Bitmap Display 设置:
 | 报告 | Bitmap 设置、屏幕布局、内存表和截图、Milestone 1 和 2、easy 1、easy 2、hard 6、How to Play | |
 | Demo | 开局画面、移动和边界、定时推行、加速、瞄准线、游戏结束 | |
 
-### Belina
+### Belina Zhu
 
 | 部分 | 内容 | 相关代码 |
 |---|---|---|

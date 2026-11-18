@@ -2,7 +2,7 @@
 # CSC258 Assembly Project: Magical Drop
 #
 # Student 1: Xiangyu Zhou, 1012571708
-# Student 2: Belina, TODO Student Number
+# Student 2: Belina Zhu, TODO Student Number
 #
 ######################## Bitmap Display Configuration ##########################
 # - Unit width in pixels:       8
