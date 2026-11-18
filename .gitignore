@@ -5,9 +5,6 @@
 __pycache__/
 *.pyc
 
-# Third-party simulators (download separately; test_mars.py needs dev-tools/mars/Mars4_5.jar)
-dev-tools/mars/
-dev-tools/saturn/
-
-# Generated test screenshots
-dev-tools/out/
+# Kept on this computer only: local notes and test tools
+完成报告.md
+dev-tools/

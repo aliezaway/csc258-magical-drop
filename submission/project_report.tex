@@ -11,9 +11,8 @@
 \setlength{\parindent}{0pt}
 \newcommand{\code}[1]{\texttt{#1}}
 
-% TODO: fill in your name(s) and student number(s).
 \title{CSC258 Project Report: Magical Drop}
-\author{TODO Name (TODO student number)}
+\author{Xiangyu Zhou (1012571708) \and Belina (TODO student number)}
 \date{}
 
 \begin{document}
@@ -23,40 +22,31 @@
 
 \code{MagicalDrop.asm} is a MIPS assembly version of Magical Drop for the
 Bitmap Display and the keyboard of Saturn or MARS. It reaches Milestones 1 to
-5. Table~\ref{tab:features} lists the features that were added for
-Milestones 4 and 5, using the numbers of the project handout.
+5. For Milestones 4 and 5 it uses combination (d) of Milestone 5: two easy
+features and three hard features (Table~\ref{tab:features}, numbered as in the
+project handout). The same five features also satisfy combination (c) of
+Milestone 4.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{@{}cl@{}}
+\begin{tabular}{@{}clp{9.5cm}@{}}
 \toprule
-\multicolumn{2}{@{}l}{\textbf{Easy features}}\\
+ & No. & Feature\\
 \midrule
-1 & Row advancement on a timer (menu options 1 to 3)\\
-2 & Row advancement gets faster after every new row\\
-3 & Easy, Medium or Hard is selected before the game\\
-4 & Game Over screen in pixels with a retry option\\
-5 & Sound effects (grab, throw, blocked, match, chain, new row, game over)\\
-6 & Pause with \code{p}; a ``PAUSED'' message is shown until \code{p} is pressed again\\
-7 & The highest score so far is tracked and displayed\\
-8 & A ``rows left'' counter; the Game Over screen appears when it reaches 0\\
-9 & A preview panel above the top row shows the next row of bubbles\\
+Easy & 1 & Row advancement on a timer: the first timer row comes after 500 frames\\
+Easy & 2 & Row advancement gets faster: 50 frames less after every new row, down to 150\\
 \midrule
-\multicolumn{2}{@{}l}{\textbf{Hard features}}\\
-\midrule
-2 & Flood fill (horizontal and vertical) after the vertical match-3 trigger\\
-3 & Gravity: unsupported bubbles float upwards\\
-4 & New rows are checked so that they never arrive already forming a match-3\\
-5 & Chain reactions: matching and removal repeat until no match remains\\
-6 & A flashing dotted aiming line in the character's column\\
-7 & Score in pixels, based on difficulty, bubbles cleared and chain depth\\
-9 & Animations: popping bubbles, cascading float-up, thrown bubble, game over curtain\\
-10 & Menu screen with the difficulty selection and the best score\\
+Hard & 2 & Flood fill (horizontal and vertical) after the vertical match-3 trigger\\
+Hard & 3 & Gravity: unsupported bubbles float upwards\\
+Hard & 6 & A flashing dotted aiming line in the character's column\\
 \bottomrule
 \end{tabular}
 \caption{Features implemented for Milestones 4 and 5.}
 \label{tab:features}
 \end{table}
+
+Hard features 2 and 3 are steps of the matching process of
+Section~\ref{sec:m3}; hard feature 6 is part of the drawing code.
 
 \section{Bitmap Display Configuration}
 
@@ -65,16 +55,17 @@ Milestones 4 and 5, using the numbers of the project handout.
 \toprule
 Unit width in pixels & 8\\
 Unit height in pixels & 8\\
-Display width in pixels & 512\\
+Display width in pixels & 256\\
 Display height in pixels & 512\\
 Base address for display & \code{0x10008000} (\code{\$gp})\\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The display is therefore $64 \times 64$ units. Unit $(x, y)$ is the word at
-address \code{0x10008000} $+\ 4\,(64y + x)$. The display uses
-$4096$ words (\code{0x10008000} to \code{0x1000BFFF}), so it ends before the
+The display is therefore $32 \times 64$ units. Unit $(x, y)$ is the word at
+address \code{0x10008000} $+\ 4\,(32y + x)$, so moving one unit to the right
+adds 4 bytes and moving one unit down adds 128 bytes. The display uses
+$2048$ words (\code{0x10008000} to \code{0x10009FFF}), so it ends before the
 \code{.data} section at \code{0x10010000} and no padding variable is needed.
 
 \section{Memory Layout Plan}
@@ -87,13 +78,13 @@ playing field are 4 units apart, which leaves one black unit between
 neighbouring bubbles. The cell in row $r$ and column $c$ has its top-left
 unit at
 \[
-x = 2 + 4c, \qquad y = 6 + 4r \qquad (r = 0,\dots,13,\quad c = 0,\dots,6).
+x = 2 + 4c, \qquad y = 2 + 4r \qquad (r = 0,\dots,13,\quad c = 0,\dots,6).
 \]
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/layout.png}
-\caption{Plan of the $64 \times 64$ unit display.}
+\includegraphics[width=0.9\textwidth]{figures/layout.png}
+\caption{Plan of the $32 \times 64$ unit display.}
 \label{fig:layout}
 \end{figure}
 
@@ -147,7 +138,7 @@ hold temporary values.
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{@{}lllp{7.6cm}@{}}
+\begin{tabular}{@{}lllp{7.2cm}@{}}
 \toprule
 Address & Label & Size & Contents\\
 \midrule
@@ -156,37 +147,20 @@ Address & Label & Size & Contents\\
 \code{0x10010008} & \code{grid} & 98 words & the playing field (Table~\ref{tab:grid})\\
 \code{0x10010190} & \code{mark} & 98 words & 1 for every cell of the match being removed\\
 \code{0x10010318} & \code{ff\_stack} & 98 words & work stack of the flood fill (cell indices)\\
-\code{0x100104a0} & \code{next\_row} & 7 words & the next row, shown in the preview panel\\
-\code{0x100104bc} & \code{ff\_count} & 1 word & number of entries on \code{ff\_stack}\\
-\code{0x100104c0} & \code{player\_col} & 1 word & column of the character, 0 to 6\\
-\code{0x100104c4} & \code{held\_colour} & 1 word & colour of the held bubbles, 0 if none\\
-\code{0x100104c8} & \code{held\_count} & 1 word & number of held bubbles\\
-\code{0x100104cc} & \code{score} & 1 word & current score\\
-\code{0x100104d0} & \code{high\_score} & 1 word & best score so far (kept across retries)\\
-\code{0x100104d4} & \code{rows\_left} & 1 word & rows still to come\\
-\code{0x100104d8} & \code{cleared\_total} & 1 word & bubbles cleared in this game\\
-\code{0x100104dc} & \code{chain\_depth} & 1 word & depth of the chain reaction being resolved\\
-\code{0x100104e0} & \code{difficulty} & 1 word & 1 easy, 2 medium, 3 hard, 4 keystroke mode\\
-\code{0x100104e4} & \code{score\_mult} & 1 word & score multiplier of the difficulty\\
-\code{0x100104e8} & \code{row\_timer} & 1 word & frames since the last new row\\
-\code{0x100104ec} & \code{row\_interval} & 1 word & frames between two new rows\\
-\code{0x100104f0} & \code{key\_count} & 1 word & keystrokes since the last new row\\
-\code{0x100104f4} & \code{frame\_count} & 1 word & frames since the game started\\
-\code{0x100104f8} & \code{game\_result} & 1 word & 0 lost, 1 won\\
-\code{0x100104fc} & \code{hud\_dirty} & 1 word & 1 when the HUD numbers must be redrawn\\
+\code{0x100104a0} & \code{ff\_count} & 1 word & number of entries on \code{ff\_stack}\\
+\code{0x100104a4} & \code{player\_col} & 1 word & column of the character, 0 to 6 (starts at 3)\\
+\code{0x100104a8} & \code{held\_colour} & 1 word & colour of the held bubbles, 0 if none\\
+\code{0x100104ac} & \code{held\_count} & 1 word & number of held bubbles\\
+\code{0x100104b0} & \code{row\_timer} & 1 word & frames since the last new row\\
+\code{0x100104b4} & \code{key\_count} & 1 word & keystrokes (\code{a}, \code{d}, \code{s}, \code{w}) since the last new row\\
+\code{0x100104b8} & \code{row\_interval} & 1 word & frames until the next timer row: 500 at the start, 50 less after every new row, at least 150\\
+\code{0x100104bc} & \code{frame\_count} & 1 word & frames drawn so far (makes the aiming line flash)\\
 \midrule
-\code{0x10010500} & \code{interval\_table} & 5 words & \code{0, 540, 400, 280, 0}\\
-\code{0x10010514} & \code{rows\_table} & 5 words & \code{0, 30, 40, 50, 30}\\
-\code{0x10010528} & \code{mult\_table} & 5 words & \code{0, 1, 2, 3, 1}\\
-\code{0x1001053c} & \code{win\_notes} & 4 words & \code{72, 76, 79, 84}\\
-\code{0x1001054c} & \code{palette} & 27 words & 9 entries of 3 shades (dark, base, light)\\
-\code{0x100105b8} & \code{player\_sprite} & 9 words & the $3 \times 3$ character sprite\\
-\code{0x100105dc} & \code{font} & 36 words & $3 \times 5$ glyphs for 0--9 and A--Z\\
-\code{0x1001066c} & \code{str\_\ldots} & 147 bytes & the text shown on screen (\code{.asciiz})\\
+\code{0x100104c0} & \code{palette} & 15 words & 5 entries of 3 shades (dark, base, light)\\
+\code{0x100104fc} & \code{player\_sprite} & 9 words & the $3 \times 3$ character sprite\\
 \bottomrule
 \end{tabular}
-\caption{Layout of the \code{.data} section. The addresses assume that
-\code{.data} starts at \code{0x10010000}.}
+\caption{Layout of the \code{.data} section (it ends at \code{0x10010520}).}
 \label{tab:memory}
 \end{table}
 
@@ -202,18 +176,13 @@ holds a dark shade $D$, the base colour $B$ and a light shade $L$:
 \hline
 \end{tabular}
 \end{center}
-Entries 1 to 4 are the four bubble colours and entry 0 is all black, so
-drawing ``colour 0'' erases a cell. Entry 5 is grey (game over). Entries 6, 7
-and 8 are a white square, a white plus and a white dot; drawing a bubble with
-them one after the other is the popping animation.
+Entries 1 to 4 are the four bubble colours. Entry 0 is all black, so drawing
+``colour 0'' erases a cell; this is why the whole field can simply be redrawn
+every frame.
 
 \textbf{Character.} \code{player\_sprite} stores the nine colours of the
 character in row major order. Its centre unit is replaced by the colour of
 the held bubbles while the character is holding something.
-
-\textbf{Font.} Each glyph is one word. Bit 14 is the top-left unit of the
-$3 \times 5$ glyph and bit 0 the bottom-right unit. For example the digit
-\code{2} is the rows \code{111 001 111 100 111}, which is \code{0x73e7}.
 
 \subsection{Memory after assembling}
 
@@ -242,18 +211,14 @@ Address & Value & Meaning\\
 \midrule
 \code{0x10010000} & \code{0x10008000} & \code{display\_address}\\
 \code{0x10010004} & \code{0xffff0000} & \code{keyboard\_address}\\
-\code{0x10010008} -- \code{0x100104bc} & \code{0x00000000} & \code{grid}, \code{mark}, \code{ff\_stack}, \code{next\_row}, \code{ff\_count}\\
-\code{0x100104c0} & \code{0x00000003} & \code{player\_col} (the middle column)\\
-\code{0x100104e0} & \code{0x00000001} & \code{difficulty}\\
-\code{0x100104e4} & \code{0x00000001} & \code{score\_mult}\\
-\code{0x100104fc} & \code{0x00000001} & \code{hud\_dirty}\\
-\code{0x10010504} & \code{0x0000021c} & \code{interval\_table[1]} $= 540$\\
-\code{0x10010558} & \code{0x00900000} & \code{palette} entry 1 (red), dark shade\\
-\code{0x1001055c} & \code{0x00e02020} & \code{palette} entry 1 (red), base colour\\
-\code{0x10010560} & \code{0x00ff9090} & \code{palette} entry 1 (red), light shade\\
-\code{0x100105c8} & \code{0x00ff60c0} & centre of \code{player\_sprite}\\
-\code{0x100105dc} & \code{0x00007b6f} & \code{font} glyph \code{0}\\
-\code{0x100105e4} & \code{0x000073e7} & \code{font} glyph \code{2}\\
+\code{0x10010008} -- \code{0x100104a0} & \code{0x00000000} & \code{grid}, \code{mark}, \code{ff\_stack}, \code{ff\_count}\\
+\code{0x100104a4} & \code{0x00000003} & \code{player\_col} (the middle column)\\
+\code{0x100104b8} & \code{0x000001f4} & \code{row\_interval} $= 500$\\
+\code{0x100104bc} & \code{0x00000000} & \code{frame\_count}\\
+\code{0x100104cc} & \code{0x00900000} & \code{palette} entry 1 (red), dark shade\\
+\code{0x100104d0} & \code{0x00e02020} & \code{palette} entry 1 (red), base colour\\
+\code{0x100104d4} & \code{0x00ff9090} & \code{palette} entry 1 (red), light shade\\
+\code{0x1001050c} & \code{0x00ff60c0} & centre of \code{player\_sprite}\\
 \bottomrule
 \end{tabular}
 \caption{Values expected in memory right after assembling.}
@@ -262,25 +227,24 @@ Address & Value & Meaning\\
 
 \section{Milestone 1: The Static Scene}
 
-The scene is drawn by two groups of functions. \code{draw\_static\_scene}
-clears the screen and draws what never changes during a game: the walls, the
-line above the character's row and the HUD labels. \code{draw\_scene} draws
-what can change: the preview panel (\code{draw\_preview}), the 98 cells of
-the field (\code{draw\_grid}), the character (\code{draw\_player}), the aiming
-line (\code{draw\_aim}), the timer bar and the HUD numbers. Everything is
-built on a few small functions: \code{draw\_bubble} ($x$, $y$, palette
-entry), \code{draw\_char}, \code{draw\_string}, \code{draw\_number},
-\code{draw\_hline}, \code{draw\_vline} and \code{clear\_rect}.
+\code{draw\_walls} clears the screen and draws what never changes: the four
+walls and the red line above the character's row. \code{draw\_board} draws
+what can change: the 98 cells of the field (\code{draw\_grid}), the aiming
+line (\code{draw\_aim}) and the character (\code{draw\_player}). They are built on \code{draw\_bubble}
+($x$, $y$, colour), \code{draw\_hline}, \code{draw\_vline} and
+\code{clear\_screen}.
 
-A new game starts with five rows of random bubbles in four colours.
+A game starts with five rows of random bubbles in four colours: \code{main}
+calls \code{push\_row} five times. Random rows can already contain a vertical
+match-3, so \code{main} then runs \code{resolve\_matches} once; this is why
+some columns may start shorter than five bubbles.
 
 % TODO: replace this picture with your own screenshot of the Bitmap Display.
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.55\textwidth]{figures/static_scene.png}
-\caption{The scene drawn by \code{MagicalDrop.asm} at the start of a game:
-the $7 \times 14$ playing field with five rows of random bubbles, the preview
-panel above it, the character in the bottom row and the HUD.}
+\includegraphics[width=0.3\textwidth]{figures/static_scene.png}
+\caption{The scene at the start of a game: the $7 \times 14$ playing field
+with five rows of random bubbles and the character in the bottom row.}
 \label{fig:static}
 \end{figure}
 
@@ -300,17 +264,19 @@ together with all bubbles of the same colour stacked directly above it. The
 colour and the count are stored in \code{held\_colour} and
 \code{held\_count}. Pressing \code{s} again adds more bubbles, but only if
 they have the colour that is already held.
-\item \textbf{Row advancement.} With menu option 4 a new row arrives after
-every 10 keystrokes (\code{key\_count}). \code{push\_row} moves every bubble
-down by one row, copies \code{next\_row} into row 0 and generates a new
-\code{next\_row}.
-\item \textbf{Repainting.} \code{draw\_scene} repaints the field every frame.
+\item \textbf{Row advancement.} Every \code{a}, \code{d}, \code{s} or
+\code{w} increases \code{key\_count}; after 10 keystrokes a new row arrives.
+\code{push\_row} moves every bubble down by one row and fills row 0 with
+seven random bubbles (system call 42).
+\item \textbf{Repainting.} \code{draw\_board} repaints the field every frame.
 \item \textbf{Quit.} \code{q} ends the program with system call 10.
 \item \textbf{Game over.} After a new row has been placed,
-\code{advance\_row} checks row 13. If it contains a bubble the game ends.
+\code{advance\_row} checks row 13. If it contains a bubble, the field is drawn
+one last time and the program ends.
 \end{itemize}
 
 \section{Milestone 3: Throwing, Matching and Chain Reactions}
+\label{sec:m3}
 
 \textbf{Position limits.} \code{move\_left} and \code{move\_right} do nothing
 when the character is already in column 0 or column 6.
@@ -319,9 +285,10 @@ when the character is already in column 0 or column 6.
 is the first free row of the character's column, directly below its lowest
 bubble. The held bubbles are placed from there downwards. They may use rows 0
 to 12 only; bubbles that do not fit stay in the character's hand, and if
-there is no free row the throw is refused.
+there is no free row nothing happens.
 
-\textbf{Matching.} After a throw, \code{resolve\_matches} runs the following
+\textbf{Matching (hard features 2 and 3).} After every throw, and after
+every new row, the function \code{resolve\_matches} runs the following
 loop:
 
 \begin{enumerate}[nosep]
@@ -329,102 +296,66 @@ loop:
 top to bottom for runs of three or more bubbles of the same colour. The cells
 of such a run are marked in \code{mark} and pushed on \code{ff\_stack}. If
 nothing was marked, the loop ends.
-\item \textbf{Explosion} (\code{flood\_fill}). While the stack is not empty, a
-cell is popped and its four neighbours (above, below, left, right) are
-examined. A neighbour that has the same colour and is not marked yet is
-marked and pushed. Every cell is pushed at most once, so the stack never
-needs more than 98 entries.
-\item The marked bubbles pop (animation and sound), are removed
-(\code{remove\_marked}) and the score is increased.
-\item \textbf{Gravity} (\code{float\_step}). Every bubble that has an empty
-cell directly above it moves up by one row. This step is repeated, with a
-repaint in between, until nothing moves any more.
-\item The loop starts again at step 1. If gravity has produced a new vertical
-match-3, this is a chain reaction and \code{chain\_depth} increases.
+\item \textbf{Explosion: flood fill} (\code{flood\_fill}, hard 2). While the
+stack is not empty, a cell is popped and its four neighbours (above, below,
+left, right) are examined. A neighbour that has the same colour and is not
+marked yet is marked and pushed. Every cell is pushed at most once, so the
+stack never needs more than 98 entries.
+\item The marked bubbles are removed (\code{remove\_marked}).
+\item \textbf{Gravity} (\code{float\_step}, hard 3). Every bubble that has an
+empty cell directly above it moves up by one row. This step is repeated until
+nothing moves any more, so every column is again filled from the top without
+gaps.
+\item The loop starts again at step 1: if gravity has lined up a new
+vertical match-3, it is removed as well.
 \end{enumerate}
 
-\textbf{Score.} Each step of the loop adds
-\[
-\textrm{bubbles removed} \times 10 \times \textrm{chain depth} \times
-\textrm{difficulty multiplier}
-\]
-to the score, where the multiplier is 1 for Easy and keystroke mode, 2 for
-Medium and 3 for Hard.
-
-\section{Milestones 4 and 5: Features}
-
-\textbf{Timer, speed and difficulty (easy 1, 2, 3).} In modes 1 to 3 a new
-row arrives when \code{row\_timer} reaches \code{row\_interval}. The interval
-starts at 540, 400 or 280 frames for Easy, Medium and Hard and shrinks by 10
-frames after every new row, down to 150 frames. The separator under the
-preview panel fills up in orange to show how close the next row is.
-
-\textbf{Rows left and preview (easy 8, 9).} A game has 30, 40 or 50 rows.
-\code{rows\_left} is shown in the HUD and decreases whenever a new row is
-placed. When it reaches 0 the player has survived every row and the Game Over
-screen is shown with ``YOU WIN''. The preview panel always shows
-\code{next\_row}, which is exactly the row that will be placed next.
-
-\textbf{Game over, retry and high score (easy 4, 7).} When the game is lost,
-the bubbles turn grey row by row and the Game Over screen shows the score and
-the best score. \code{r} starts a brand new game with the same difficulty,
-\code{m} returns to the menu and \code{q} quits. Only \code{high\_score} is
-kept between games.
-
-\textbf{Sound and pause (easy 5, 6).} Sounds are played with system call 31:
-grabbing, throwing, a refused action, a match (higher for every step of a
-chain reaction), a new row, and a falling scale or a rising jingle at the end
-of the game. \code{p} shows ``PAUSED'' and stops the game, including the row
-timer, until \code{p} is pressed again.
-
-\textbf{No ready-made matches (hard 4).} \code{validate\_next\_row} re-rolls
-a bubble of \code{next\_row} while it has the same colour as the two top
-bubbles of its column. It is called whenever a new row is generated and after
-every grab or throw, so the row in the preview can never form a match-3 when
-it arrives. The five initial rows are produced the same way.
-
-\textbf{Aiming line (hard 6).} \code{draw\_aim} draws a dotted line from the
-lowest bubble of the character's column down to the character. It is on for
-16 frames and off for 16 frames, and takes the colour of the held bubbles.
-
-\textbf{Animations (hard 9).} Matched bubbles flash white and shrink away,
-bubbles float up one row at a time, a thrown bubble flies up the column, and
-the field turns grey row by row when the game is lost.
-
-Figure~\ref{fig:screens} shows some of the screens.
+Figure~\ref{fig:screens} shows the loop on an example. The steps happen
+within one frame; the pictures b) to e) were drawn by the game's own drawing
+code after each step.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/screens.png}
-\caption{Screens of the game.}
+\includegraphics[width=0.85\textwidth]{figures/screens.png}
+\caption{a) The character holds a blue bubble under column 2; the dotted
+aiming line shows where it will land. b) The throw completes a vertical blue
+match-3. c) The flood fill also takes the blue bubble connected to it in
+column 3, so four blues are removed. d) Gravity lets the two reds in column 3
+float up, lining up three reds. e) The loop runs again and removes them. f) A
+game that is over: a new row has pushed bubbles into the character's row.}
 \label{fig:screens}
 \end{figure}
+
+\section{Milestones 4 and 5: Features}
+
+\textbf{Timer (easy 1).} Every frame without a new row increases the counter
+\code{row\_timer}. When it reaches the value of \code{row\_interval}, a new
+row arrives. A new row from the timer or from 10 keystrokes resets both
+counters, so the rows come from whichever happens first.
+
+\textbf{Faster and faster (easy 2).} After every new row, \code{row\_interval}
+becomes 50 frames shorter: 500, 450, 400, \dots, down to 150 frames. At about
+60 frames per second this is roughly 8 seconds at the start and 2.5 seconds
+at the end.
+
+\textbf{Aiming line (hard 6).} \code{draw\_aim} draws one grey dot in the
+centre of every empty cell of the character's column, from the lowest bubble
+down to the red line, so it shows where a throw will land. It only draws when
+bit 4 of \code{frame\_count} is 0, which is true for 16 frames and false for
+the next 16, so the line flashes. \code{draw\_grid} paints the empty cells
+black first, so the dots disappear by themselves in the frames where they are
+not drawn.
+
+\textbf{Flood fill and gravity (hard 2, 3).} See Section~\ref{sec:m3}.
 
 \section{How to Play}
 
 \textbf{Setup.} Open \code{MagicalDrop.asm} in Saturn or MARS. Set the Bitmap
-Display to a unit width and height of 8, a display width and height of 512
-and the base address \code{0x10008000 (\$gp)}. In MARS, connect both the
-Bitmap Display and the Keyboard and Display MMIO Simulator to MIPS. Assemble
-and run the program, then click the bitmap window (Saturn) or the keyboard
-area (MARS) so that it receives the keystrokes.
-
-\textbf{Menu.} Choose a mode:
-
-\begin{center}
-\begin{tabular}{@{}cl@{}}
-\toprule
-Key & Mode\\
-\midrule
-\code{1} & Easy: a new row about every 9 seconds, 30 rows, score $\times 1$\\
-\code{2} & Medium: a new row about every 7 seconds, 40 rows, score $\times 2$\\
-\code{3} & Hard: a new row about every 5 seconds, 50 rows, score $\times 3$\\
-\code{4} & Keystroke mode: a new row after every 10 keystrokes, 30 rows, score $\times 1$\\
-\bottomrule
-\end{tabular}
-\end{center}
-
-In modes 1 to 3 the rows arrive faster and faster during the game.
+Display to a unit width and height of 8, a display width of 256, a display
+height of 512 and the base address \code{0x10008000 (\$gp)}. In MARS, connect
+both the Bitmap Display and the Keyboard and Display MMIO Simulator to MIPS.
+Assemble and run the program, then click the bitmap window (Saturn) or the
+keyboard area (MARS) so that it receives the keystrokes.
 
 \textbf{Controls.}
 
@@ -436,10 +367,8 @@ Key & Action\\
 \code{a} / \code{d} & move the character left / right\\
 \code{s} & grab the lowest bubble of the column above, with all bubbles of the same\\
  & colour directly above it; press again to add more bubbles of that colour\\
-\code{w} & throw the held bubbles up into the column above\\
-\code{p} & pause; \code{p} again resumes\\
+\code{w} & throw the held bubbles up into the column above (where the dotted line ends)\\
 \code{q} & quit\\
-\code{r} / \code{m} & on the Game Over screen: retry / back to the menu\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -447,13 +376,14 @@ Key & Action\\
 \textbf{Goal.} Line up three or more bubbles of the same colour vertically by
 throwing bubbles into a column. The match removes those bubbles and every
 bubble of the same colour connected to them. The bubbles below float up and
-can cause chain reactions, which are worth more points. New rows keep pushing
-the field down. The game is lost when a bubble reaches the bottom row, where
-the character moves, and it is won when the ``LEFT'' counter reaches 0.
+can line up new matches. A new row pushes the field down after every 10
+keystrokes or when the row timer runs out, whichever comes first, and the
+timer gets shorter after every new row. The game is over when a bubble
+reaches the bottom row, where the character moves.
 
-\textbf{Screen.} The row above the field is the next row that will arrive,
-and the bar below it fills up as that row gets closer. The HUD shows the
-score, the best score, the rows left and the colour and number of the bubbles
-the character is holding.
+\textbf{Screen.} The centre of the character shows the colour of the bubbles
+it is holding. The flashing dotted line above the character shows where a
+throw will land. The red line marks the character's row: a bubble below it
+ends the game.
 
 \end{document}
