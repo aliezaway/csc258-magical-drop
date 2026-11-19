@@ -11,6 +11,15 @@
 \setlength{\parindent}{0pt}
 \newcommand{\code}[1]{\texttt{#1}}
 
+% The figures are in figures/ next to this file. If that folder is missing,
+% the document still compiles and shows a note in place of each figure; the
+% submitted project_report.pdf contains all of them.
+\newcommand{\figurefile}[2]{%
+  \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
+    \fbox{\parbox[c][3cm][c]{\dimexpr #1-2\fboxsep-2\fboxrule\relax}{\centering\small
+      Figure file \texttt{\detokenize{#2}} is not included here;\\
+      see \texttt{project\_report.pdf} for this figure.}}}}
+
 \title{CSC258 Project Report: Magical Drop}
 \author{Xiangyu Zhou (1012571708) \and Belina Zhu (TODO student number)}
 \date{}
@@ -83,7 +92,7 @@ x = 2 + 4c, \qquad y = 2 + 4r \qquad (r = 0,\dots,13,\quad c = 0,\dots,6).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/layout.png}
+\figurefile{0.9\textwidth}{figures/layout.png}
 \caption{Plan of the $32 \times 64$ unit display.}
 \label{fig:layout}
 \end{figure}
@@ -188,7 +197,7 @@ the held bubbles while the character is holding something.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/memory_screenshot.png}
+\figurefile{\textwidth}{figures/memory_screenshot.png}
 \caption{Memory in Saturn right after assembling (the program is stopped at a
 breakpoint on the first instruction of \code{main}). Top: from
 \code{0x10010000}, the two addresses followed by the empty \code{grid}.
@@ -240,7 +249,7 @@ some columns may start shorter than five bubbles.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.3\textwidth]{figures/static_scene.png}
+\figurefile{0.3\textwidth}{figures/static_scene.png}
 \caption{Screenshot of the Bitmap Display in Saturn at the start of a game:
 the $7 \times 14$ playing field with five rows of random bubbles (one column
 lost bubbles to a match in the random rows), the flashing aiming line and the
@@ -318,7 +327,7 @@ code after each step.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/screens.png}
+\figurefile{0.85\textwidth}{figures/screens.png}
 \caption{a) The character holds a blue bubble under column 2; the dotted
 aiming line shows where it will land. b) The throw completes a vertical blue
 match-3. c) The flood fill also takes the blue bubble connected to it in

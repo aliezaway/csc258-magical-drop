@@ -20,7 +20,7 @@
 | `submission/MagicalDrop.asm` | 游戏程序 |
 | `submission/project_report.tex` | 项目报告源文件 |
 | `submission/project_report.pdf` | 由 tex 编译出的报告 |
-| `submission/figures/` | 报告用到的四张图(`layout.png`、`screens.png`、`static_scene.png`、`memory_screenshot.png`),编译 tex 时需要 |
+| `submission/figures/` | 报告用到的四张图(`layout.png`、`screens.png`、`static_scene.png`、`memory_screenshot.png`)。和 tex 放在一起时,编译出的报告带图;没有这个文件夹时 tex 也能编译,图的位置会换成提示框,提交的 PDF 里图是全的 |
 
 ## 运行
 
