@@ -31,9 +31,10 @@
 
 \code{MagicalDrop.asm} is a MIPS assembly version of Magical Drop for the
 Bitmap Display and the keyboard of Saturn or MARS. It reaches Milestones 1 to
-5. For Milestones 4 and 5 it uses combination (d) of Milestone 5: two easy
-features and three hard features (Table~\ref{tab:features}, numbered as in the
-project handout). The same five features also satisfy combination (c) of
+5. For Milestones 4 and 5 it uses two easy features and four hard features
+(Table~\ref{tab:features}, numbered as in the project handout). This
+satisfies combination (d) of Milestone 5 (two easy and three hard features)
+as well as combination (e) (four hard features), and combination (c) of
 Milestone 4.
 
 \begin{table}[H]
@@ -47,6 +48,7 @@ Easy & 2 & Row advancement gets faster: 50 frames less after every new row, down
 \midrule
 Hard & 2 & Flood fill (horizontal and vertical) after the vertical match-3 trigger\\
 Hard & 3 & Gravity: unsupported bubbles float upwards\\
+Hard & 5 & Chain reactions: matching and removal repeat until no match remains\\
 Hard & 6 & A flashing dotted aiming line in the character's column\\
 \bottomrule
 \end{tabular}
@@ -54,7 +56,7 @@ Hard & 6 & A flashing dotted aiming line in the character's column\\
 \label{tab:features}
 \end{table}
 
-Hard features 2 and 3 are steps of the matching process of
+Hard features 2, 3 and 5 are steps of the matching process of
 Section~\ref{sec:m3}; hard feature 6 is part of the drawing code.
 
 \section{Bitmap Display Configuration}
@@ -298,7 +300,7 @@ bubble. The held bubbles are placed from there downwards. They may use rows 0
 to 12 only; bubbles that do not fit stay in the character's hand, and if
 there is no free row nothing happens.
 
-\textbf{Matching (hard features 2 and 3).} After every throw, and after
+\textbf{Matching (hard features 2, 3 and 5).} After every throw, and after
 every new row, the function \code{resolve\_matches} runs the following
 loop:
 
@@ -317,8 +319,9 @@ stack never needs more than 98 entries.
 empty cell directly above it moves up by one row. This step is repeated until
 nothing moves any more, so every column is again filled from the top without
 gaps.
-\item The loop starts again at step 1: if gravity has lined up a new
-vertical match-3, it is removed as well.
+\item \textbf{Chain reaction} (hard 5). The loop starts again at step 1:
+if gravity has lined up a new vertical match-3, it is removed as well, and
+so on until no match remains.
 \end{enumerate}
 
 Figure~\ref{fig:screens} shows the loop on an example. The steps happen
@@ -332,7 +335,7 @@ code after each step.
 aiming line shows where it will land. b) The throw completes a vertical blue
 match-3. c) The flood fill also takes the blue bubble connected to it in
 column 3, so four blues are removed. d) Gravity lets the two reds in column 3
-float up, lining up three reds. e) The loop runs again and removes them. f) A
+float up, lining up three reds. e) The loop runs again and removes them: a chain reaction (hard 5). f) A
 game that is over: a new row has pushed bubbles into the character's row;
 the bubble in the character's cell is shown instead of the character.}
 \label{fig:screens}
@@ -358,7 +361,7 @@ the next 16, so the line flashes. \code{draw\_grid} paints the empty cells
 black first, so the dots disappear by themselves in the frames where they are
 not drawn.
 
-\textbf{Flood fill and gravity (hard 2, 3).} See Section~\ref{sec:m3}.
+\textbf{Flood fill, gravity and chain reactions (hard 2, 3, 5).} See Section~\ref{sec:m3}.
 
 \section{How to Play}
 
@@ -404,8 +407,8 @@ ends the game.
 Table~\ref{tab:attribution} lists which team member is responsible for each
 part of \code{MagicalDrop.asm}, and Table~\ref{tab:attribution-report} the
 parts of this report and of the demonstration. Each milestone has one person
-responsible; Xiangyu Zhou also connects both parts in \code{main} and
-\code{game\_loop}.
+responsible, each person has one easy and two hard features, and Belina Zhu
+also merges both parts into one file.
 
 \begin{table}[H]
 \centering
@@ -429,27 +432,29 @@ a new row every 10 keystrokes, repainting, quitting, game over &
 \addlinespace
 Milestone 3 & Position limits, throwing, finding and removing vertical
 match-3s & the limits in \code{move\_left} and \code{move\_right},
-\code{handle\_throw}, \code{find\_matches}, \code{resolve\_matches},
-\code{remove\_marked} & Belina Zhu\\
+\code{handle\_throw}, \code{find\_matches}, \code{remove\_marked} &
+Belina Zhu\\
 \addlinespace
 Easy 1 & Row advancement on a timer & \code{row\_timer} in \code{game\_loop}
-& Xiangyu Zhou\\
+& Belina Zhu\\
 \addlinespace
 Easy 2 & Row advancement gets faster & the lines in \code{game\_loop} that
-shorten \code{row\_interval} & Belina Zhu\\
+shorten \code{row\_interval} & Xiangyu Zhou\\
 \addlinespace
 Hard 2 & Flood fill & \code{flood\_fill}, \code{ff\_try}, \code{ff\_stack} &
 Belina Zhu\\
 \addlinespace
 Hard 3 & Gravity: unsupported bubbles float up & \code{float\_step} &
-Belina Zhu\\
+Xiangyu Zhou\\
+\addlinespace
+Hard 5 & Chain reactions: trigger, flood fill, removal and gravity repeat
+until no match remains & \code{resolve\_matches} & Belina Zhu\\
 \addlinespace
 Hard 6 & Flashing dotted aiming line & \code{draw\_aim},
 \code{frame\_count} & Xiangyu Zhou\\
 \addlinespace
-Integration & Connecting both parts, the \code{.data} layout, the preamble,
-testing in Saturn & \code{main}, \code{game\_loop}, \code{.data} &
-Xiangyu Zhou\\
+Integration & Merging both parts into one file, the \code{.data} layout,
+the preamble, testing in Saturn & \code{.data}, the preamble & Belina Zhu\\
 \bottomrule
 \end{tabular}
 \caption{Who is responsible for each part of \code{MagicalDrop.asm}.}
@@ -463,14 +468,15 @@ Xiangyu Zhou\\
 \toprule
 Student & Report sections & Demonstration\\
 \midrule
-Xiangyu Zhou & Bitmap Display Configuration, Memory Layout Plan (with the
-memory screenshots), Milestone 1, Milestone 2, easy 1, hard 6, How to Play &
-starting screen, movement, grabbing, rows after 10 keystrokes, timer rows,
-aiming line, game over, quitting\\
+Xiangyu Zhou & Bitmap Display Configuration, the screen layout, Milestone 1,
+Milestone 2, easy 2, hard 3, hard 6, How to Play & starting screen,
+movement, grabbing, rows after 10 keystrokes, rows coming faster, bubbles
+floating up, aiming line, game over, quitting\\
 \addlinespace
-Belina Zhu & Milestone 3, easy 2, hard 2, hard 3 (with the step-by-step
-figure) & position limits, throwing, removing a vertical match-3, flood fill,
-bubbles floating up, rows coming faster\\
+Belina Zhu & Memory Layout Plan (with the memory screenshots), Milestone 3,
+easy 1, hard 2, hard 5 (with the step-by-step figure) & position limits,
+throwing, removing a vertical match-3, flood fill, chain reactions, timer
+rows\\
 \bottomrule
 \end{tabular}
 \caption{Who is responsible for each part of this report and of the

@@ -14,7 +14,7 @@
 ################################################################################
 #
 # Milestones reached: 1, 2, 3, 4, 5
-#   (Milestone 5 through combination d: 2 easy features + 3 hard features)
+#   (2 easy + 4 hard features: Milestone 5 through combination d or e)
 #
 # Easy features implemented (numbers refer to the project handout):
 #   1. Row advancement on a timer: the first timer row comes after 500 frames
@@ -23,8 +23,9 @@
 #
 # Hard features implemented:
 #   2. Flood fill (horizontal + vertical) after the vertical match-3 trigger
-#   3. Gravity: unsupported bubbles float upwards (if this lines up a new
-#      match-3, it is removed as well)
+#   3. Gravity: unsupported bubbles float upwards
+#   5. Chain reactions: if gravity lines up a new match-3, the matching and
+#      removal process repeats until no match remains
 #   6. Flashing dotted aiming line in the character's column
 #
 # How to play:
@@ -420,7 +421,7 @@ ar_done:
 # resolve_matches: the complete matching process. Repeats
 #   trigger (vertical match-3) -> flood fill -> remove -> gravity
 # until no vertical match-3 remains, so a match that gravity lines up is
-# removed as well.
+# removed as well (chain reactions, hard feature 5).
 resolve_matches:
     addi $sp, $sp, -4
     sw $ra, 0($sp)
@@ -432,7 +433,7 @@ rm_loop:
 rm_float:
     jal float_step                  # $v0 = 1 if a bubble moved
     bne $v0, $zero, rm_float        # repeat until every bubble is supported
-    j rm_loop                       # gravity may have made a new match
+    j rm_loop                       # chain reaction: check for a new match
 rm_done:
     lw $ra, 0($sp)
     addi $sp, $sp, 4

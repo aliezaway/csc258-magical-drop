@@ -55,7 +55,7 @@ Bitmap Display 设置:
 
 ## 完成的 Milestone 和功能
 
-- Milestone 1–5 全部完成。Milestone 5 用组合 (d):2 个 easy + 3 个 hard。
+- Milestone 1–5 全部完成。一共 2 个 easy + 4 个 hard,满足 Milestone 5 的组合 (d)(2 easy + 3 hard)和组合 (e)(4 hard)。
 
 | 类型 | 编号 | 功能 |
 |---|---|---|
@@ -63,11 +63,12 @@ Bitmap Display 设置:
 | easy | 2 | 推行逐渐加速 |
 | hard | 2 | flood fill:相连的同色球一起消掉 |
 | hard | 3 | gravity:悬空的球往上浮 |
+| hard | 5 | 连锁:上浮后又凑成三连,会接着再消,直到没有为止 |
 | hard | 6 | 角色所在列的闪烁瞄准虚线 |
 
 ## 分工
 
-每个 Milestone 由一个人负责,Milestone 4 和 5 的功能分给两个人;Xiangyu Zhou 负责把两个人的代码接起来。
+每个 Milestone 由一个人负责;Milestone 4 和 5 的功能每人 1 个 easy、2 个 hard;Belina Zhu 负责把两个人的代码合并起来。
 
 ### 总览
 
@@ -76,12 +77,13 @@ Bitmap Display 设置:
 | Milestone 1:画场景 | Xiangyu Zhou |
 | Milestone 2:主循环和操作 | Xiangyu Zhou |
 | Milestone 3:扔球和消除 | Belina Zhu |
-| easy 1:定时推行 | Xiangyu Zhou |
-| easy 2:推行逐渐加速 | Belina Zhu |
+| easy 1:定时推行 | Belina Zhu |
+| easy 2:推行逐渐加速 | Xiangyu Zhou |
 | hard 2:flood fill | Belina Zhu |
-| hard 3:gravity | Belina Zhu |
+| hard 3:gravity | Xiangyu Zhou |
+| hard 5:连锁 | Belina Zhu |
 | hard 6:闪烁瞄准虚线 | Xiangyu Zhou |
-| 整合代码 | Xiangyu Zhou |
+| 整合代码 | Belina Zhu |
 
 ### Xiangyu Zhou
 
@@ -89,22 +91,23 @@ Bitmap Display 设置:
 |---|---|---|
 | Milestone 1 | 画出整个场景:墙、红线、格子、球、角色、颜色表 | `draw_walls`、`draw_board`、`draw_grid`、`draw_bubble`、`draw_player`、`draw_hline`、`draw_vline`、`clear_screen`、`palette`、`player_sprite` |
 | Milestone 2 | 主循环、读键盘、左右移动、吸球、开局 5 行、每 10 次按键推一行、每帧重画、`q` 退出、球到底就结束 | `main`、`game_loop`、`move_left`、`move_right`、`handle_grab`、`find_lowest`、`push_row`、`random_colour`、`advance_row`、`game_over`、`quit_game` |
-| easy 1 | 定时推行 | `game_loop` 里的 `row_timer` |
+| easy 2 | 推行逐渐加速 | `game_loop` 里每来一行后把 `row_interval` 减 50 的那几行 |
+| hard 3 | gravity:悬空的球往上浮 | `float_step` |
 | hard 6 | 闪烁瞄准虚线 | `draw_aim`、`frame_count` |
-| 整合 | 把两个人的函数接进 `main` 和 `game_loop`;负责 `.data` 内存布局和 preamble;合并代码后在 Saturn 里测试 | `main`、`game_loop`、`.data` |
-| 报告 | Bitmap 设置、屏幕布局、内存表和截图、Milestone 1、Milestone 2、easy 1、hard 6、How to Play | |
-| Demo | 开局画面、移动、吸球、按键推行、定时推行、瞄准线、游戏结束、退出 | |
+| 报告 | Bitmap 设置、屏幕布局、Milestone 1、Milestone 2、easy 2、hard 3、hard 6、How to Play | |
+| Demo | 开局画面、移动、吸球、按键推行、推行越来越快、上浮补位、瞄准线、游戏结束、退出 | |
 
 ### Belina Zhu
 
 | 部分 | 内容 | 相关代码 |
 |---|---|---|
-| Milestone 3 | 左右边界、扔球、找竖着的三连并删除 | `move_left` / `move_right` 里的边界判断、`handle_throw`、`find_matches`、`resolve_matches`、`remove_marked` |
-| easy 2 | 推行逐渐加速 | `game_loop` 里每来一行后把 `row_interval` 减 50 的那几行 |
+| Milestone 3 | 左右边界、扔球、找竖着的三连并删除 | `move_left` / `move_right` 里的边界判断、`handle_throw`、`find_matches`、`remove_marked` |
+| easy 1 | 定时推行 | `game_loop` 里的 `row_timer` |
 | hard 2 | flood fill | `flood_fill`、`ff_try`、`ff_stack` |
-| hard 3 | gravity | `float_step` |
-| 报告 | Milestone 3、easy 2、hard 2、hard 3(含消除分步图) | |
-| Demo | 左右边界、扔球、三连消除、flood fill、上浮补位、推行越来越快 | |
+| hard 5 | 连锁:把找三连、flood fill、删除、上浮按顺序串起来,重复到没有三连为止 | `resolve_matches` |
+| 整合 | 把两个人的代码合并成一个文件;负责 `.data` 内存布局和 preamble;合并后在 Saturn 里测试 | `.data`、preamble |
+| 报告 | 内存表和截图、Milestone 3、easy 1、hard 2、hard 5(含消除分步图) | |
+| Demo | 左右边界、扔球、三连消除、flood fill、连锁(配合分步图讲)、定时推行 | |
 
 ### 衔接约定
 
@@ -112,8 +115,9 @@ Bitmap Display 设置:
   - `grid`:98 个 word,0 表示空,1–4 表示红、黄、绿、蓝;第 r 行第 c 列存在 `grid + 4 * (7r + c)`。
   - 角色和手里的球:`player_col`、`held_colour`、`held_count`。
   - `find_lowest`(Xiangyu Zhou 写,`handle_throw` 也会用):`$a0` 传列号,`$v0` 返回这一列最下面那个球的行号,空列返回 -1。
+  - `float_step`(Xiangyu Zhou 写,`resolve_matches` 会用):没有参数;让悬空的球往上浮一格,`$v0` = 1 表示还有球在动。
   - `resolve_matches`(Belina Zhu 写):没有参数;开局时、每次扔完球、每来一行新的之后调用,做完后盘面上不会留下竖着的三连。
 - 左右移动先由 Xiangyu Zhou 写好(Milestone 2),Belina Zhu 再在里面加上边界判断(Milestone 3)。
-- easy 2 的代码写在 `game_loop` 里每次推完新行之后,由 Xiangyu Zhou 整合时接好。
+- `game_loop` 由 Xiangyu Zhou 写(Milestone 2);easy 1 的计时和 easy 2 的加速都写在里面,由 Belina Zhu 合并时接好。
 - 合并后一起在 Saturn 里测试,并准备 demo。
 - 两个人都要各自在 Quercus 提交 `MagicalDrop.asm`、`project_report.tex`、`project_report.pdf`,`figures/` 里的图按 Quercus 的要求一并提交。
