@@ -67,36 +67,53 @@ Bitmap Display 设置:
 
 ## 分工
 
+每个 Milestone 由一个人负责,Milestone 4 和 5 的功能分给两个人;Xiangyu Zhou 负责把两个人的代码接起来。
+
+### 总览
+
+| 部分 | 负责人 |
+|---|---|
+| Milestone 1:画场景 | Belina Zhu |
+| Milestone 2:主循环和操作 | Xiangyu Zhou |
+| Milestone 3:扔球和消除 | Belina Zhu |
+| easy 1:定时推行 | Xiangyu Zhou |
+| easy 2:推行逐渐加速 | Belina Zhu |
+| hard 2:flood fill | Belina Zhu |
+| hard 3:gravity | Belina Zhu |
+| hard 6:闪烁瞄准虚线 | Xiangyu Zhou |
+| 整合代码 | Xiangyu Zhou |
+
 ### Xiangyu Zhou
 
 | 部分 | 内容 | 相关代码 |
 |---|---|---|
-| Milestone 1 | 画出整个场景:墙、红线、格子、球、角色、颜色表 | `draw_walls`、`draw_board`、`draw_grid`、`draw_bubble`、`draw_player`、`draw_hline`、`draw_vline`、`clear_screen`、`palette`、`player_sprite` |
-| Milestone 2 | 主循环、读键盘、左右移动、开局 5 行、每 10 次按键推一行、球到底就结束 | `main`、`game_loop`、`move_left`、`move_right`、`push_row`、`random_colour`、`advance_row`、`game_over` |
-| Milestone 3 | 左右边界 | `move_left`、`move_right` |
+| Milestone 2 | 主循环、读键盘、左右移动、吸球、开局 5 行、每 10 次按键推一行、每帧重画、`q` 退出、球到底就结束 | `main`、`game_loop`、`move_left`、`move_right`、`handle_grab`、`find_lowest`、`push_row`、`random_colour`、`advance_row`、`game_over`、`quit_game` |
 | easy 1 | 定时推行 | `game_loop` 里的 `row_timer` |
-| easy 2 | 推行逐渐加速 | `game_loop` 里的 `row_interval` |
 | hard 6 | 闪烁瞄准虚线 | `draw_aim`、`frame_count` |
-| 报告 | Bitmap 设置、屏幕布局、内存表和截图、Milestone 1 和 2、easy 1、easy 2、hard 6、How to Play | |
-| Demo | 开局画面、移动和边界、定时推行、加速、瞄准线、游戏结束 | |
+| 整合 | 把两个人的函数接进 `main` 和 `game_loop`;负责 `.data` 内存布局和 preamble;合并代码后在 Saturn 里测试 | `main`、`game_loop`、`.data` |
+| 报告 | Bitmap 设置、屏幕布局、内存表和截图、Milestone 2、easy 1、hard 6、How to Play | |
+| Demo | 移动、吸球、按键推行、定时推行、瞄准线、游戏结束、退出 | |
 
 ### Belina Zhu
 
 | 部分 | 内容 | 相关代码 |
 |---|---|---|
-| Milestone 2 | 吸球 | `handle_grab`、`find_lowest` |
-| Milestone 3 | 扔球、找竖着的三连并删除 | `handle_throw`、`find_matches`、`resolve_matches` |
-| hard 2 | flood fill | `flood_fill`、`ff_try`、`remove_marked`、`ff_stack` |
+| Milestone 1 | 画出整个场景:墙、红线、格子、球、角色、颜色表 | `draw_walls`、`draw_board`、`draw_grid`、`draw_bubble`、`draw_player`、`draw_hline`、`draw_vline`、`clear_screen`、`palette`、`player_sprite` |
+| Milestone 3 | 左右边界、扔球、找竖着的三连并删除 | `move_left` / `move_right` 里的边界判断、`handle_throw`、`find_matches`、`resolve_matches`、`remove_marked` |
+| easy 2 | 推行逐渐加速 | `game_loop` 里每来一行后把 `row_interval` 减 50 的那几行 |
+| hard 2 | flood fill | `flood_fill`、`ff_try`、`ff_stack` |
 | hard 3 | gravity | `float_step` |
-| 报告 | Milestone 3 的消除流程和分步图 | |
-| Demo | 吸球、扔球、三连消除、flood fill、上浮补位 | |
+| 报告 | Milestone 1、Milestone 3、easy 2、hard 2、hard 3(含消除分步图) | |
+| Demo | 开局画面、左右边界、扔球、三连消除、flood fill、上浮补位、推行越来越快 | |
 
-### 一起完成
+### 衔接约定
 
-- 开头的 preamble 和 `.data` 内存布局。
 - 写代码前先约定好共用的格式:
   - `grid`:98 个 word,0 表示空,1–4 表示红、黄、绿、蓝;第 r 行第 c 列存在 `grid + 4 * (7r + c)`。
   - 角色和手里的球:`player_col`、`held_colour`、`held_count`。
   - `find_lowest`:`$a0` 传列号,`$v0` 返回这一列最下面那个球的行号,空列返回 -1。
+  - `draw_bubble`:`$a0` 是 x,`$a1` 是 y,`$a2` 是颜色(0–4);`draw_board` 每帧由主循环调用一次。
+- 左右移动先由 Xiangyu Zhou 写好(Milestone 2),Belina Zhu 再在里面加上边界判断(Milestone 3)。
+- easy 2 的代码写在 `game_loop` 里每次推完新行之后,由 Xiangyu Zhou 整合时接好。
 - 合并后一起在 Saturn 里测试,并准备 demo。
 - 两个人都要各自在 Quercus 提交 `MagicalDrop.asm`、`project_report.tex`、`project_report.pdf`,`figures/` 里的图按 Quercus 的要求一并提交。
