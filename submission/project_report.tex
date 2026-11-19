@@ -327,7 +327,7 @@ code after each step.
 
 \begin{figure}[H]
 \centering
-\figurefile{0.85\textwidth}{figures/screens.png}
+\figurefile{0.8\textwidth}{figures/screens.png}
 \caption{a) The character holds a blue bubble under column 2; the dotted
 aiming line shows where it will land. b) The throw completes a vertical blue
 match-3. c) The flood fill also takes the blue bubble connected to it in
@@ -397,5 +397,85 @@ reaches the bottom row, where the character moves.
 it is holding. The flashing dotted line above the character shows where a
 throw will land. The red line marks the character's row: a bubble below it
 ends the game.
+
+\section{Attribution Table}
+\label{sec:attribution}
+
+Table~\ref{tab:attribution} lists which team member is responsible for each
+part of \code{MagicalDrop.asm}, and Table~\ref{tab:attribution-report} the
+parts of this report and of the demonstration. Each milestone has one person
+responsible; Xiangyu Zhou also connects both parts in \code{main} and
+\code{game\_loop}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.1cm}@{}}
+\toprule
+Part & Work & Code & Student\\
+\midrule
+Milestone 1 & Static scene: walls, red line, grid, bubbles, character and
+colours & \code{draw\_walls}, \code{draw\_board}, \code{draw\_grid},
+\code{draw\_bubble}, \code{draw\_player}, \code{draw\_hline},
+\code{draw\_vline}, \code{clear\_screen}, \code{palette},
+\code{player\_sprite} & Xiangyu Zhou\\
+\addlinespace
+Milestone 2 & Game loop, keyboard, movement, grabbing, the five starting rows,
+a new row every 10 keystrokes, repainting, quitting, game over &
+\code{main}, \code{game\_loop}, \code{move\_left}, \code{move\_right},
+\code{handle\_grab}, \code{find\_lowest}, \code{push\_row},
+\code{random\_colour}, \code{advance\_row}, \code{game\_over},
+\code{quit\_game} & Xiangyu Zhou\\
+\addlinespace
+Milestone 3 & Position limits, throwing, finding and removing vertical
+match-3s & the limits in \code{move\_left} and \code{move\_right},
+\code{handle\_throw}, \code{find\_matches}, \code{resolve\_matches},
+\code{remove\_marked} & Belina Zhu\\
+\addlinespace
+Easy 1 & Row advancement on a timer & \code{row\_timer} in \code{game\_loop}
+& Xiangyu Zhou\\
+\addlinespace
+Easy 2 & Row advancement gets faster & the lines in \code{game\_loop} that
+shorten \code{row\_interval} & Belina Zhu\\
+\addlinespace
+Hard 2 & Flood fill & \code{flood\_fill}, \code{ff\_try}, \code{ff\_stack} &
+Belina Zhu\\
+\addlinespace
+Hard 3 & Gravity: unsupported bubbles float up & \code{float\_step} &
+Belina Zhu\\
+\addlinespace
+Hard 6 & Flashing dotted aiming line & \code{draw\_aim},
+\code{frame\_count} & Xiangyu Zhou\\
+\addlinespace
+Integration & Connecting both parts, the \code{.data} layout, the preamble,
+testing in Saturn & \code{main}, \code{game\_loop}, \code{.data} &
+Xiangyu Zhou\\
+\bottomrule
+\end{tabular}
+\caption{Who is responsible for each part of \code{MagicalDrop.asm}.}
+\label{tab:attribution}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{7.0cm}>{\raggedright\arraybackslash}p{5.6cm}@{}}
+\toprule
+Student & Report sections & Demonstration\\
+\midrule
+Xiangyu Zhou & Bitmap Display Configuration, Memory Layout Plan (with the
+memory screenshots), Milestone 1, Milestone 2, easy 1, hard 6, How to Play &
+starting screen, movement, grabbing, rows after 10 keystrokes, timer rows,
+aiming line, game over, quitting\\
+\addlinespace
+Belina Zhu & Milestone 3, easy 2, hard 2, hard 3 (with the step-by-step
+figure) & position limits, throwing, removing a vertical match-3, flood fill,
+bubbles floating up, rows coming faster\\
+\bottomrule
+\end{tabular}
+\caption{Who is responsible for each part of this report and of the
+demonstration.}
+\label{tab:attribution-report}
+\end{table}
 
 \end{document}
