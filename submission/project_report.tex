@@ -291,8 +291,9 @@ reached the character's row is never hidden behind the character.
 \section{Milestone 3: Throwing, Matching and Chain Reactions}
 \label{sec:m3}
 
-\textbf{Position limits.} \code{move\_left} and \code{move\_right} do nothing
-when the character is already in column 0 or column 6.
+\textbf{Position limits.} \code{move\_left} and \code{move\_right} first ask
+\code{in\_field} whether the new column is inside the playing field (column 0
+to 6). If it is not, the character stays where it is.
 
 \textbf{Throwing.} \code{w} calls \code{handle\_throw}. The landing position
 is the first free row of the character's column, directly below its lowest
@@ -343,13 +344,16 @@ the bubble in the character's cell is shown instead of the character.}
 
 \section{Milestones 4 and 5: Features}
 
-\textbf{Timer (easy 1).} Every frame without a new row increases the counter
+\textbf{Timer (easy 1).} In every frame without 10 keystrokes,
+\code{game\_loop} calls \code{row\_timer\_tick}, which increases the counter
 \code{row\_timer}. When it reaches the value of \code{row\_interval}, a new
 row arrives. A new row from the timer or from 10 keystrokes resets both
-counters, so the rows come from whichever happens first.
+counters (\code{row\_timer\_reset} restarts the timer), so the rows come from
+whichever happens first.
 
-\textbf{Faster and faster (easy 2).} After every new row, \code{row\_interval}
-becomes 50 frames shorter: 500, 450, 400, \dots, down to 150 frames. At about
+\textbf{Faster and faster (easy 2).} After every new row, \code{game\_loop}
+calls \code{speed\_up}, which makes \code{row\_interval} 50 frames shorter:
+500, 450, 400, \dots, down to 150 frames. At about
 60 frames per second this is roughly 8 seconds at the start and 2.5 seconds
 at the end.
 
@@ -404,60 +408,62 @@ ends the game.
 \section{Attribution Table}
 \label{sec:attribution}
 
-Table~\ref{tab:attribution} lists which team member is responsible for each
-part of \code{MagicalDrop.asm}, and Table~\ref{tab:attribution-report} the
-parts of this report and of the demonstration. Each milestone has one person
-responsible, each person has one easy and two hard features, and Belina Zhu
-also merges both parts into one file.
+\code{MagicalDrop.asm} is written in six parts, one after the other, so each
+person's code is in one place. Table~\ref{tab:attribution} lists them in the
+order of the file, and Table~\ref{tab:attribution-report} the parts of this
+report and of the demonstration. Each milestone has one person responsible,
+each person has one easy and two hard features, and Belina Zhu also merges
+both parts into one file. A part may call a function written in a later part,
+for example \code{game\_loop} (Part 2) calls \code{handle\_throw} (Part 4).
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.1cm}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.1cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{2.3cm}@{}}
 \toprule
-Part & Work & Code & Student\\
+Code part & Feature & Work & Code & Student\\
 \midrule
-Milestone 1 & Static scene: walls, red line, grid, bubbles, character and
-colours & \code{draw\_walls}, \code{draw\_board}, \code{draw\_grid},
-\code{draw\_bubble}, \code{draw\_player}, \code{draw\_hline},
-\code{draw\_vline}, \code{clear\_screen}, \code{palette},
-\code{player\_sprite} & Xiangyu Zhou\\
+Part 0 & Integration & Shared data, merging both parts into one file, the
+preamble, testing in Saturn & \code{.data}, the preamble & Belina Zhu\\
 \addlinespace
-Milestone 2 & Game loop, keyboard, movement, grabbing, the five starting rows,
-a new row every 10 keystrokes, repainting, quitting, game over &
-\code{main}, \code{game\_loop}, \code{move\_left}, \code{move\_right},
-\code{handle\_grab}, \code{find\_lowest}, \code{push\_row},
-\code{random\_colour}, \code{advance\_row}, \code{game\_over},
-\code{quit\_game} & Xiangyu Zhou\\
+Part 1 & Milestone 1 & Start of the game (five random rows), walls, red
+line, grid, bubbles, character and colours & \code{main},
+\code{random\_colour}, \code{push\_row}, \code{draw\_walls},
+\code{clear\_screen}, \code{draw\_hline}, \code{draw\_vline},
+\code{draw\_board}, \code{draw\_grid}, \code{draw\_bubble},
+\code{draw\_player}, \code{palette}, \code{player\_sprite} & Xiangyu Zhou\\
 \addlinespace
-Milestone 3 & Position limits, throwing, finding and removing vertical
-match-3s & the limits in \code{move\_left} and \code{move\_right},
-\code{handle\_throw}, \code{find\_matches}, \code{remove\_marked} &
-Belina Zhu\\
+Part 2 & Milestone 2 & Game loop, keyboard, movement, grabbing, a new row
+every 10 keystrokes, repainting, quitting, game over & \code{game\_loop},
+\code{move\_left}, \code{move\_right}, \code{handle\_grab},
+\code{find\_lowest}, \code{advance\_row}, \code{game\_over},
+\code{quit\_game}, \code{sleep\_ms} & Xiangyu Zhou\\
 \addlinespace
-Easy 1 & Row advancement on a timer & \code{row\_timer} in \code{game\_loop}
-& Belina Zhu\\
+Part 3 & Easy 2 & Row advancement gets faster & \code{speed\_up} & Xiangyu
+Zhou\\
 \addlinespace
-Easy 2 & Row advancement gets faster & the lines in \code{game\_loop} that
-shorten \code{row\_interval} & Xiangyu Zhou\\
+Part 3 & Hard 3 & Gravity: unsupported bubbles float up &
+\code{float\_step} & Xiangyu Zhou\\
 \addlinespace
-Hard 2 & Flood fill & \code{flood\_fill}, \code{ff\_try}, \code{ff\_stack} &
-Belina Zhu\\
-\addlinespace
-Hard 3 & Gravity: unsupported bubbles float up & \code{float\_step} &
-Xiangyu Zhou\\
-\addlinespace
-Hard 5 & Chain reactions: trigger, flood fill, removal and gravity repeat
-until no match remains & \code{resolve\_matches} & Belina Zhu\\
-\addlinespace
-Hard 6 & Flashing dotted aiming line & \code{draw\_aim},
+Part 3 & Hard 6 & Flashing dotted aiming line & \code{draw\_aim},
 \code{frame\_count} & Xiangyu Zhou\\
 \addlinespace
-Integration & Merging both parts into one file, the \code{.data} layout,
-the preamble, testing in Saturn & \code{.data}, the preamble & Belina Zhu\\
+Part 4 & Milestone 3 & Position limits, throwing, finding and removing
+vertical match-3s & \code{in\_field}, \code{handle\_throw},
+\code{find\_matches}, \code{remove\_marked} & Belina Zhu\\
+\addlinespace
+Part 5 & Easy 1 & Row advancement on a timer & \code{row\_timer\_tick},
+\code{row\_timer\_reset}, \code{row\_timer} & Belina Zhu\\
+\addlinespace
+Part 5 & Hard 2 & Flood fill & \code{flood\_fill}, \code{ff\_try},
+\code{ff\_stack} & Belina Zhu\\
+\addlinespace
+Part 5 & Hard 5 & Chain reactions: trigger, flood fill, removal and gravity
+repeat until no match remains & \code{resolve\_matches} & Belina Zhu\\
 \bottomrule
 \end{tabular}
-\caption{Who is responsible for each part of \code{MagicalDrop.asm}.}
+\caption{Who is responsible for each part of \code{MagicalDrop.asm}, in the
+order of the file.}
 \label{tab:attribution}
 \end{table}
 
