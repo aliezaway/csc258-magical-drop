@@ -124,6 +124,40 @@ Bitmap Display 设置:
 | 报告 | 内存表和截图、Milestone 3、easy 1、hard 2、hard 5(含消除分步图) | |
 | Demo | 左右边界、扔球、三连消除、flood fill、连锁(配合分步图讲)、定时推行 | |
 
+### Demo 复习行号
+
+下面的行号对应提交版 `MagicalDrop.asm`。点击行号可以在 GitHub 跳到对应代码。
+
+#### Xiangyu Zhou（Part 1–3）
+
+| 功能 | Demo 时要能讲清楚的步骤 | 代码行号 |
+|---|---|---|
+| Milestone 1 开局和推行 | `main` 生成 5 排随机球。`push_row` 从下面往上复制旧格，再给最上面 7 格抽新颜色。 | [138–186](submission/MagicalDrop.asm#L138-L186) |
+| Milestone 1 绘图 | `draw_walls` 画墙和红线。`draw_grid` 逐格读颜色、算坐标，`draw_bubble` 和 `draw_player` 用 `sw` 画出 3 × 3 图案。 | [190–370](submission/MagicalDrop.asm#L190-L370) |
+| Milestone 2 主循环 | `game_loop` 读键盘、处理动作、累计按键，按满 10 次或计时到期时推一排，然后重画。 | [379–438](submission/MagicalDrop.asm#L379-L438) |
+| Milestone 2 操作和结束 | 左右移动、找本列最低球并抓取同色球，以及推行后怎么判断触底、结束或退出。 | [442–573](submission/MagicalDrop.asm#L442-L573) |
+| Easy 2 推行加速 | `speed_up` 把下次等待间隔减 50 帧，最短保留 150 帧。 | [582–590](submission/MagicalDrop.asm#L582-L590) |
+| Hard 3 向上补位 | `float_step` 检查球的上方，空着就往上移一格，并用 `$v0` 报告这一遍有没有球动过。 | [595–613](submission/MagicalDrop.asm#L595-L613) |
+| Hard 6 闪烁瞄准线 | `draw_aim` 从角色所在列的最低球下方开始画灰点，每 16 帧切换亮灭。 | [620–648](submission/MagicalDrop.asm#L620-L648) |
+
+#### Belina Zhu（Part 4、5 和共用数据整合）
+
+| 功能 | Demo 时要能讲清楚的步骤 | 代码行号 |
+|---|---|---|
+| 文件头和共用数据 | `grid` 存颜色，`mark` 存待删标记，`ff_stack` 存待检查的格子。 | [1–128](submission/MagicalDrop.asm#L1-L128) |
+| Milestone 3 边界 | `in_field` 判断角色想去的列是否在 0 到 6 之间。 | [657–664](submission/MagicalDrop.asm#L657-L664) |
+| Milestone 3 扔球 | `handle_throw` 找落点，逐颗放球，保留放不下的球，再调用消除流程。 | [670–710](submission/MagicalDrop.asm#L670-L710) |
+| Milestone 3 三连和删除 | `find_matches` 标出竖着连续三颗或更多的同色球，`remove_marked` 按标记删球并清掉标记。 | [715–768](submission/MagicalDrop.asm#L715-L768)、[772–786](submission/MagicalDrop.asm#L772-L786) |
+| Easy 1 定时推行 | `row_timer_tick` 按帧数计时，`row_timer_reset` 在推行时把计时清零。 | [796–811](submission/MagicalDrop.asm#L796-L811) |
+| Hard 2 Flood fill | `flood_fill` 从已有标记的球向上下左右检查，`ff_try` 把还没标记的同色邻居标上并排入待检查名单。 | [816–877](submission/MagicalDrop.asm#L816-L877) |
+| Hard 5 连锁 | `resolve_matches` 把找三连、扩展同色球、删除和向上补位串起来。补位稳定后再找三连，直到没有新的三连。 | [884–899](submission/MagicalDrop.asm#L884-L899) |
+
+#### 两个人都要会讲的衔接
+
+- **扔球和落点。** Belina 的 `handle_throw` 调用 Xiangyu 的 `find_lowest`。传入列号，拿回最低球的行号，空列时返回 `-1`。[第 678 行](submission/MagicalDrop.asm#L678)
+- **连锁和补位。** Belina 的 `resolve_matches` 调用 Xiangyu 的 `float_step`。一遍还有球动就再补一遍，稳定后再查三连。[第 893–895 行](submission/MagicalDrop.asm#L893-L895)
+- **计时、推行和加速。** Xiangyu 的 `game_loop` 调用 Belina 的 `row_timer_tick`。计时到期或按满 10 次就推一排，游戏继续时再调用 `speed_up`。[第 414–424 行](submission/MagicalDrop.asm#L414-L424)
+
 ### 衔接约定
 
 - 写代码前先约定好共用的格式:
